@@ -14,9 +14,11 @@ This project ams to implement a solution which can optimize the run/test for CF 
 
 We will be using [EKS Control Plane template](https://github.com/aws-quickstart/quickstart-amazon-eks/blob/main/templates/amazon-eks-controlplane.template.yaml).
 
-`mkdir templates`
+```
+mkdir templates
 
-`touch amazon-eks-controlplane.template.yaml`
+touch amazon-eks-controlplane.template.yaml
+```
 
 (Copy pasted the contents of that template in this file.)
 
@@ -35,9 +37,12 @@ Pre-requisites:
 
 We will first setup virtual environment for Python 3.9.
 
-`python3.9 -m venv env`
+```
+python3.9 -m venv env`
 
-` source env/bin/activate `
+source env/bin/activate 
+
+```
 
 The first pip dependency we will be installing is **pre-commit**. It helps us setting up pre-requisites which have to be met before commiting the codet (We will be using git version control system.
 
@@ -173,15 +178,18 @@ Cloud-Radar is a python module that allows testing of Cloudformation Templates/S
 
 We will be installing pytest and cloud-radar (version 0.6.0 as it is stable).
 
-`pip install pytest`
+```
+pip install pytest
 
-`pip install cloud-radar==0.6.0`
+pip install cloud-radar==0.6.0
+```
 
 Let's update our requirements.txt file.
 
 `pip freeze > requirements.txt`
 
 We will create the following direcotory strucure to hold our test.
+
 ```
 mkdir -p tests/unit
 
