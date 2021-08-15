@@ -2,6 +2,8 @@
 
 ## Project Description
 
+
+
 This project aims to implement a solution that can optimize the run/test for CF template. We will be running a cloudformation template and testing it without actually launching the resources. We will be using [EKS](https://github.com/aws-quickstart/quickstart-amazon-eks) open-source cloudformation template for demonstration. We will be testing and stimulating cloudformation templates with zero cost.
 
 ### The project has been divided into 3 steps:
@@ -44,9 +46,13 @@ source env/bin/activate
 
 ```
 
+![Virtualenv](/images/virtual-env.png)
+
 The first pip dependency we will be installing is **pre-commit**. It helps us setting up pre-requisites that have to be met before committing the code (We will be using git version control system.
 
 `pip install pre-commit`
+
+![pre-commit-install](/images/pre-commit-install.png)
 
 Use `pre-commit -V` to check if it's working. We will be storing our dependencies in the requirements.txt file.
 
@@ -67,9 +73,13 @@ repos:
     -   id: trailing-whitespace
 ```    
 
+![configfile](/images/config-content-1.png)
+
 We'll now run pre-commit.
 
 `pre-commit install`
+
+![pre-commit-install](/images/install-pre-commit.png)
 
 Now we will stage our files and commit them and we can see how pre-commit works when we commit our files.
 
@@ -78,6 +88,8 @@ git add .
 git commit -m "Added pre-commit"
 
 ```
+![first-commit](/images/first-precommit.png)
+
 We will see that the checks have passed and a commit has been successful.
 
 Our development environment is now set up. In our next step, we will do static code analysis.
@@ -110,6 +122,8 @@ We can test it using the following command.
 
 `pre-commit run cfn-python-lint --all-files`
 
+![cfn-lint-check](/images/pre-commit-check-cfn-lint.png)
+
 Now that it's working, let's add the changes and commit the file.
 
 ```
@@ -118,6 +132,8 @@ git add .
 git commit -m "Added cfn-lint hook"
 
 ```
+
+![cfn-lint-commit](/images/commit-cfn-lint.png)
 
 When we will pass the commit command, cfn-lint will be triggered and it will run its checks on our template. Once these tests are passed, our commit will be successful.
 
@@ -155,6 +171,8 @@ We will test cfn-nag using the following command.
 
 `pre-commit run cfn-nag --all-files`
 
+![cfn-nag](/images/pre-commit-cfn-nag.png)
+
 Now that it's working, let's add the changes and commit the file.
 
 ```
@@ -163,6 +181,10 @@ git add .
 git commit -m "Added cfn-nag hook"
 
 ```
+
+![cfn-nag-commit](/images/commit-cfn-nag.png)
+
+**Note**: The image shows skipped as the hooks have already been checked while running pre-commit command.
 
 In the next step, we will do Unit Tests so that we can test the template locally without worrying about AWS credentials.
 
@@ -181,6 +203,9 @@ We will be installing pytest and cloud-radar (version 0.6.0 as it is stable).
 `pip install pytest`
 
 `pip install cloud-radar==0.6.0`
+
+![pytest](/images/pytest install.png)
+![cloud-radar](/images/cloud-radar-install.png)
 
 Let's update our requirements.txt file.
 
@@ -349,12 +374,19 @@ Let's test pre-commit
 
 `pre-commit run --all-files`
 
+![final-check](/images/pre-commit-check3.png)
+
 Now we'll add and commit the changes.
 
-`git add .`
+```
+git add .
 
-`git commit -m "Added Unit Test"`
+git commit -m "Added Unit Test"
 
+```
+
+![cloud-radar](/images/commit-cloud-radar.png)
 
 
 We can now successfully test CloudFormation Template Without deploying to AWS.
+
