@@ -9,3 +9,11 @@ repos:
     hooks:
     -   id: cfn-python-lint
         files: templates/.*\.(json|yml|yaml)$
+-   repo: local
+    hooks:
+    -   id: cfn-nag
+        name: cfn-nag
+        language: docker_image
+        entry: alpine/cfn-nag:latest --input-path /src
+        files: templates/
+        pass_filenames: false
