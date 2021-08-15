@@ -2,11 +2,11 @@
 
 ## Project Description
 
-This project ams to implement a solution which can optimize the run/test for CF template. We will be running a cloudformation template and testing it without actually launching the resources.We will be using [EKS](https://github.com/aws-quickstart/quickstart-amazon-eks) open source cloudformation template for demonstration. We will be testing and stimulating cloudformation template with zero cost.
+This project aims to implement a solution that can optimize the run/test for CF template. We will be running a cloudformation template and testing it without actually launching the resources. We will be using [EKS](https://github.com/aws-quickstart/quickstart-amazon-eks) open-source cloudformation template for demonstration. We will be testing and stimulating cloudformation templates with zero cost.
 
 ### The project has been divided into 3 steps:
 #### Step-1: Setup and Pre-requisites
-#### Step-2: Static Code Analysis
+#### Step-2: Static Code Analysis 
 #### Step-3: Unit-Testing
 
 
@@ -14,15 +14,13 @@ This project ams to implement a solution which can optimize the run/test for CF 
 
 We will be using [EKS Control Plane template](https://github.com/aws-quickstart/quickstart-amazon-eks/blob/main/templates/amazon-eks-controlplane.template.yaml).
 
-```
-mkdir templates
+`mkdir templates`
 
-touch amazon-eks-controlplane.template.yaml
-```
+`touch amazon-eks-controlplane.template.yaml`
 
 (Copy pasted the contents of that template in this file.)
 
-**Note**: I've checked into the official documentation and made some changes in template accordingly as changes were required in  Resource properties.
+**Note**: I've checked into the official documentation and made some changes in the template accordingly as changes were required in  Resource properties.
 
 
 Tools that we will be using are pip installable.
@@ -33,30 +31,27 @@ Pre-requisites:
 - Pre-commit
 - GIT
 
-**Note** : This is run and tested on Operating System: Ubuntu 18.04 LTE
+**Note**: This is run and tested on Operating System: Ubuntu 18.04 LTE
 
-We will first setup virtual environment for Python 3.9.
+We will first set up a virtual environment for Python 3.9.
 
-```
-python3.9 -m venv env`
+`python3.9 -m venv env`
 
-source env/bin/activate 
+` source env/bin/activate `
 
-```
-
-The first pip dependency we will be installing is **pre-commit**. It helps us setting up pre-requisites which have to be met before commiting the codet (We will be using git version control system.
+The first pip dependency we will be installing is **pre-commit**. It helps us setting up pre-requisites that have to be met before committing the code (We will be using git version control system.
 
 `pip install pre-commit`
 
-Use `pre-commit -V` to check if it's working. We will be storing our dependencies in requirements.txt file.
+Use `pre-commit -V` to check if it's working. We will be storing our dependencies in the requirements.txt file.
 
 `pip freeze > requirements.txt`
 
-Let's setup pre-commit with some checks. We will create **.pre-commit-config.yaml** file and add some checks.
+Let's set up pre-commit with some checks. We will create **.pre-commit-config.yaml** file and add some checks.
 
 `touch .pre-commit-config.yaml`
 
-Add these lines to the files. We are using two basic hooks, end-of-file-fixer and trailing-whitespaces. Hooks are of two types, client-side and server-side. Client-side hooks are triggered by operations such as commiting and merging (which we will be using), while server-side hooks are run on recieving pushed commits.
+Add these lines to the files. We are using two basic hooks, end-of-file-fixer and trailing-whitespaces. Hooks are of two types, client-side and server-side. Client-side hooks are triggered by operations such as committing and merging (which we will be using), while server-side hooks are run on receiving pushed commits.
 
 ```
 repos:
@@ -65,7 +60,7 @@ repos:
     hooks:
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
-```
+```    
 
 We'll now run pre-commit.
 
@@ -80,16 +75,16 @@ git commit -m "Added pre-commit"
 ```
 We will see that the checks have passed and a commit has been successful.
 
-Our development environment is now setup. In our next step we will do static code analysis.
+Our development environment is now set up. In our next step, we will do static code analysis.
 
 ## Static Code Analysis
 
-Static code analysis is testing the code without actually running it. There are multiple types of static code analysis but we will be using Linters and Static Application Security Test. SAST analyzes code to find securtiy vulnerabilities. A linter does the following:  flag programming errors, bugs, stylistic errors, and suspicious constructs.
+Static code analysis is testing the code without actually running it. There are multiple types of static code analysis but we will be using Linters and Static Application Security Test. SAST analyzes code to find security vulnerabilities. A linter does the following:  flag programming errors, bugs, stylistic errors, and suspicious constructs.
 
 ### Linting
 
-We will be using [cfn-lint](https://github.com/aws-cloudformation/cfn-lint). It validates AWS CloudFormation json/yaml templates against the AWS CloudFormation Resource Specification. Documentation and the rules can be found in the forementioned link.
-With pre-commit installed it's easy to add new checks. To add cfn-lint, we need to modify .pre-commit-config.yaml file. We should use the latest version of cfn-lint to not get unnecesary errors. **files** consists of template directory which will consist of our CloudFormation template that we are testing.
+We will be using [cfn-lint](https://github.com/aws-cloudformation/cfn-lint). It validates AWS CloudFormation json/yaml templates against the AWS CloudFormation Resource Specification. Documentation and the rules can be found in the aforementioned link.
+With pre-commit installed it's easy to add new checks. To add cfn-lint, we need to modify .pre-commit-config.yaml file. We should use the latest version of cfn-lint to not get unnecessary errors. **files** consists of a template directory which will consist of the CloudFormation template that we are testing.
 
 ```
 repos:
@@ -119,13 +114,13 @@ git commit -m "Added cfn-lint hook"
 
 ```
 
-When we will pass the commit command, cfn-lint will be triggered and it will run it's checks on our template. Once these tests are passed, our commit will be successful.
+When we will pass the commit command, cfn-lint will be triggered and it will run its checks on our template. Once these tests are passed, our commit will be successful.
 
 ### SAST (Static Application Security Test)
 
 We will be using [cfn-nag](https://github.com/stelligent/cfn_nag) tool to scan our template for potential security risks.
 
-We will be adding the cfn-nag check to our pre-commit config file. We will be using our own local hook . The following lines need to be added in .pre-commit-connfig.yaml file. **docker_image hooks** can be conveniently configured as local hooks.The entry specifies the docker tag to use. If an image has an ENTRYPOINT defined, nothing special is needed to hook up the executable.
+We will be adding the cfn-nag check to our pre-commit config file. We will be using our local hook. The following lines need to be added in .pre-commit-connfig.yaml file. **docker_image hooks** can be conveniently configured as local hooks. The entry specifies the docker tag to use. If an image has an ENTRYPOINT defined, nothing special is needed to hook up the executable.
 
 Our .pre-commit-config.yaml file will look like this after making the changes.
 
@@ -164,12 +159,12 @@ git commit -m "Added cfn-nag hook"
 
 ```
 
-In the next step we will do Unit Tests so that we can test the template locally without worrying about AWS credentials.
+In the next step, we will do Unit Tests so that we can test the template locally without worrying about AWS credentials.
 
 
 ## Unit Tests
 
-A unit test is a way of testing a unit - the smallest piece of code that can be logically isolated in a system. In most programming languages, that is a function, a subroutine, a method or property. Our template will be our application and all the aws resources and conditions will be the units.
+A unit test is a way of testing a unit - the smallest piece of code that can be logically isolated in a system. In most programming languages, that is a function, a subroutine, a method, or property. Our template will be our application and all the AWS resources and conditions will be the units.
 
 We will be unit testing our template using [Cloud-Radar](https://github.com/DontShaveTheYak/cloud-radar).
 Cloud-Radar is a python module that allows testing of Cloudformation Templates/Stacks using Python. We don't have to deal with the AWS credentials and we don't have to deploy the resources to test the template.
@@ -178,18 +173,15 @@ Cloud-Radar is a python module that allows testing of Cloudformation Templates/S
 
 We will be installing pytest and cloud-radar (version 0.6.0 as it is stable).
 
-```
-pip install pytest
+`pip install pytest`
 
-pip install cloud-radar==0.6.0
-```
+`pip install cloud-radar==0.6.0`
 
 Let's update our requirements.txt file.
 
 `pip freeze > requirements.txt`
 
-We will create the following direcotory strucure to hold our test.
-
+We will create the following directory structure to hold our test.
 ```
 mkdir -p tests/unit
 
@@ -200,7 +192,7 @@ touch tests/unit/test_eks_controlpane.py
 
 **cloud-radar** works by reading our Cloudformation template and then rendering it the same way that the AWS Cloudformation service would. Our template consists of multiple parameters and resources that are to be created. We will be testing all of the resources that are going to be created.
 
-Let's start writing our tests. We will first import pytest and fetch our template path inorder to use the template. The following is our code to achieve the samee.
+Let's start writing our tests. We will first import pytest and fetch our template path in order to use the template. The following is our code to achieve the same.
 
 ```
 from pathlib import Path
@@ -219,10 +211,10 @@ def template_path() -> Path:
 
 ```
 
-Fixtures are functions, which will run before each test function to which it is applied. Fixtures are used to feed some data to the tests and here it will provide template path.
+Fixtures are functions, which will run before each test function to which it is applied. Fixtures are used to feed some data to the tests and here it will provide a template path.
 
 
-Let's write our test for the template.Create a Template object using the path to a Cloudformation template.We will create dictionary of parameters and pass it to the template.
+Let's write our test for the template. Create a Template object using the path to a Cloudformation template. We will create a dictionary of parameters and pass it to the template.
 
 ```
 def test_ephemeral_bucket(template_path: Path):
@@ -234,7 +226,7 @@ def test_ephemeral_bucket(template_path: Path):
     region = "us-west-2"
 
     SecurityGroupIds = ['sg-6979fe18','sg-6979fg21'] #Example Security group ids used
-    SubnetIds = ['subnet-6782e71w','subnet-6792e32e'] #Example subnet ids used
+    SubnetIds = ['subnet-6782e71w','subnet-6792e32e'] #Example subnet ids used 
     KubernetesVersion = '1.14'
     RoleArn = 'arn:aws:iam::555555555555:role/eks-service-role-AWSServiceRoleForAmazonEKS-EXAMPLEBQ4PI' # Example Iam role arn used
     Ipv4Cidrs = ['10.100.0.0/16'] # Example Ipv4 Cidrs used
@@ -250,7 +242,7 @@ def test_ephemeral_bucket(template_path: Path):
 
 ```
 
-The return of the template.render() is a dictionary which has all the CloudFormation functions and conditions solved.
+The return of the template.render() is a dictionary that has all the CloudFormation functions and conditions solved.
 
 We can print our template using the following piece of code.
 
@@ -264,14 +256,14 @@ print(json.dumps(result, indent=4, default=str))
 We will first make sure that proper resources have been created.
 
 ```
-	# Check if proper resources have been created
+	# Check if proper resources have been created 
     resource_list = ["KMSKey","EKS","CleanupLoadBalancers","CallerArn", "ClusterOIDCProvider",]
     for resource in resource_list:
         assert resource in result["Resources"]
 
 ```
 
-After we make sure proper resources are created, we will check each one of the resource by mapping the parameters and checking the conditions that were passed.
+After we make sure proper resources are created, we will check each one of the resources by mapping the parameters and checking the conditions that were passed.
 
 ```
  	# Test KMS Policy
@@ -299,7 +291,7 @@ After we make sure proper resources are created, we will check each one of the r
         assert subnet in EKS_resource['ResourcesVpcConfig']['SubnetIds']
 
     assert template.AccountId in EKS_resource['RoleArn']
-
+ 
 ```
 
 **Note**: AccoutId is default to "555555555555" and other default values are listed [here](https://github.com/DontShaveTheYak/cloud-radar#usage).
@@ -316,7 +308,7 @@ assert template.AccountId in outputs['EksArn']['Export']['Name']
 
 ```
 
-The unit tests are working. Let's update .pre-commit-config.yaml file to run them for every commit. We will add pytest hook to config file. After making the changes, the config file will look as below.
+The unit tests are working. Let's update .pre-commit-config.yaml file to run them for every commit. We will add pytest hook to the config file. After making the changes, the config file will look as below.
 
 ```
 
@@ -360,4 +352,4 @@ Now we'll add and commit the changes.
 
 
 
-We can now successfully test CloudFormation Template Withou deploying to AWS.
+We can now successfully test CloudFormation Template Without deploying to AWS.
