@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Deploys the EKS control plane (qs-1p7nknofn)"
+#Transform: [QuickStartParameterResolver]
+Metadata:
+  QSLint:
+    Exclusions: [W9002, W9003, W9004, W9006]
+  #ConfigSetName: !Ref ConfigSetName
+Parameters:
+  SecurityGroupIds:
+    Type: List<AWS::EC2::SecurityGroup::Id>
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+  RoleArn:
+    Type: String
+  KubernetesVersion:
+    Type: String
+    Default: ""
+  Ipv4Cidrs:
+    Type: String
+    Default: 0.0.0.0/0
+  EKSEncryptSecrets:
+    Type: String
+    AllowedValues: [Enabled, Disabled]
+    Default: Enabled
+  EKSEncryptSecretsKmsKeyArn:
+    Type: String
+    Default: ""
+  IamOidcProvider:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Enabled"
+  EKSClusterName:
+    Type: String
+Conditions:
+  CreateKey: !And
+    - !Equals [ !Ref EKSEncryptSecretsKmsKeyArn, "" ]
+    - !Equals [ !Ref EKSEncryptSecrets, Enabled ]
+  EnableEncryption: !Equals [ !Ref EKSEncryptSecrets, Enabled ]
+  EnableIamOidcProvider: !Equals [!Ref 'IamOidcProvider', 'Enabled']
+Mappings:
+  Config:
+    Prefix: { Value: 'eks-quickstart' }
+Resources:
+  KMSKey:
+    Condition: CreateKey
+    Type: "AWS::KMS::Key"
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks: [EIAMPolicyActionWildcard]
+          ignore_reasons:
+            EIAMPolicyWildcardResource: 'this is the default kms policy as per https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html#key-policy-default'
+    Properties:
+      EnableKeyRotation: True
+      KeyPolicy: {
+        "Version": "2012-10-17",
+        "Id": "key-default-1",
+        "Statement": [
+          {
+            "Sid": "Enable IAM User Permissions",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+            },
+            "Action": "kms:*",
+            "Resource": "*"
+          }
+        ]
+      }
+  EKS:
+    Type: "AWS::EKS::Cluster"
+    DependsOn: CleanupLoadBalancers
+    Properties:
+      Name: !Ref EKSClusterName
+      KubernetesNetworkConfig:
+        ServiceIpv4Cidr: !Ref Ipv4Cidrs
+      ResourcesVpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIds
+      EncryptionConfig: !If
+        - EnableEncryption
+        - - Resources: [ secrets ]
+            Provider:
+              KeyArn: !If [ CreateKey, !GetAtt KMSKey.Arn, !Ref EKSEncryptSecretsKmsKeyArn ]
+        - !Ref AWS::NoValue
+      RoleArn: !Ref RoleArn
+      Version: !Ref KubernetesVersion
+  CleanupLoadBalancers:
+    Type: Custom::CleanupLoadBalancers
+    Properties:
+      ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-CleanupLoadBalancers', {Prefix: !FindInMap [Config, Prefix, Value]}]
+      ClusterName: !Ref EKSClusterName
+  CallerArn:
+    Type: Custom::GetCallerArn
+    Properties:
+      ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-GetCallerArn', {Prefix: !FindInMap [Config, Prefix, Value]}]
+  ClusterOIDCProvider:
+    Condition: EnableIamOidcProvider
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - 9e99a48a9960b14926bb7f3b02e22da2b0ab7280
+      Url: !GetAtt EKS.OpenIdConnectIssuerUrl
+
+Outputs:
+  EksArn:
+    Value: !GetAtt EKS.Arn
+    Export:
+      Name: !Sub ${RoleArn}
+  CAData:
+    Value: !GetAtt EKS.CertificateAuthorityData
+  EKSEndpoint:
+    Value: !GetAtt EKS.Endpoint
+  OIDCIssuerURL:
+    Value: !GetAtt EKS.OpenIdConnectIssuerUrl
+  EKSName:
+    Value: !Ref EKS
+    Export:
+      Name: !Sub ${EKSClusterName}
